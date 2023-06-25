@@ -3,13 +3,11 @@ package io.mkolodziejczyk92.anonymoussanta.data.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.mkolodziejczyk92.anonymoussanta.data.enums.ERole;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Set;
 
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
