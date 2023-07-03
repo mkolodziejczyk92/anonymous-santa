@@ -12,6 +12,7 @@ import org.springframework.security.web.authentication.AuthenticationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
@@ -24,17 +25,25 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .csrf()
-                .disable()
-                .authorizeHttpRequests()
-                .requestMatchers("/api/v1/auth/**")
-                .permitAll()
-                .anyRequest()
-                .authenticated()
-                .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
+                .csrf((csrf) -> csrf.disable())
+                .authorizeHttpRequests((authorizeHttpRequests) ->
+                        authorizeHttpRequests
+                                .requestMatchers("/api/v1/auth/**").permitAll()
+                                .anyRequest()
+                                .authenticated()
+                )
+                .formLogin(withDefaults())
+                .sessionManagement((sessionManagement) ->
+                        sessionManagement
+                                .sessionConcurrency((sessionConcurrency) ->
+                                        sessionConcurrency
+                                                .maximumSessions(1)
+                                                .expiredUrl("/login?expired")
+                                ))
+//                Do wprowadzenia !!!!  VV
+//                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+
+
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
