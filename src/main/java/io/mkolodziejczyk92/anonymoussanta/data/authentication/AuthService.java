@@ -2,10 +2,12 @@ package io.mkolodziejczyk92.anonymoussanta.data.authentication;
 
 import io.mkolodziejczyk92.anonymoussanta.data.config.JwtService;
 import io.mkolodziejczyk92.anonymoussanta.data.entity.User;
+import io.mkolodziejczyk92.anonymoussanta.data.enums.ERole;
 import io.mkolodziejczyk92.anonymoussanta.data.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,19 +26,34 @@ public class AuthService {
                 .username(request.getUsername())
                 .password(encoder.encode(request.getPassword()))
                 .email(request.getEmail())
-                .roleType(RoleType.ADMIN)
+                .role(ERole.USER)
                 .build();
         userRepository.save(user);
 
-        return jwtService.generateToken(user);
+        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .roles(user.getRole().name())
+                .build();
+
+        return jwtService.generateToken(userDetails);
     }
 
     public String authenticate(AuthRequest authRequest) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
         );
-        User user = userRepository.findByUsername(authRequest.getUsername()).orElseThrow(() -> new UsernameNotFoundException("Username not found."));
-        return jwtService.generateToken(user);
+        User user = userRepository.findByUsername(
+                        authRequest.getUsername()
+                )
+                .orElseThrow(() -> new UsernameNotFoundException("Username not found."));
+
+        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .roles(user.getRole().name())
+                .build();
+        return jwtService.generateToken(userDetails);
     }
 
 }

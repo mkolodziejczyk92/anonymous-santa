@@ -5,8 +5,6 @@ import io.mkolodziejczyk92.anonymoussanta.data.enums.ERole;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Set;
-
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,7 +12,7 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "user")
-public class User extends IdCreator{
+public class User extends IdCreator {
 
     private String username;
 
@@ -33,8 +31,7 @@ public class User extends IdCreator{
     private String registrationCode;
 
     @Enumerated(EnumType.STRING)
-    @ElementCollection(fetch = FetchType.EAGER)
-    private Set<ERole> userRoles;
+    private ERole role;
 
 
 }

@@ -14,25 +14,25 @@ public class EventController {
     public EventController(EventService eventService) {
         this.eventService = eventService;
     }
-
-    @PostMapping
-    public void createEvent(@RequestBody EventDto eventDto) {
-        EventDto savedEvent = eventService.saveEvent(eventDto);
-    }
-
-    @GetMapping
-    public List<EventDto> getAllEvents() {
-        return EventService.getAllEvents();
-    }
-
-    @PutMapping("/{id}")
-    public void updateOfferById(@RequestBody EventDto eventDto, @PathVariable Long id) {
-        eventService.updateEventById(id, eventDto);
-    }
-
-    @DeleteMapping("/{id}")
-    public void deleteOfferById(@PathVariable Long id) {
-        eventService.deleteEvent(id);
-    }
+//
+//    @PostMapping
+//    public void createEvent(@RequestBody EventDto eventDto) {
+//        EventDto savedEvent = eventService.saveEvent(eventDto);
+//    }
+//
+//    @GetMapping
+//    public List<EventDto> getAllEvents() {
+//        return EventService.getAllEvents();
+//    }
+//
+//    @PutMapping("/{id}")
+//    public void updateOfferById(@RequestBody EventDto eventDto, @PathVariable Long id) {
+//        eventService.updateEventById(id, eventDto);
+//    }
+//
+//    @DeleteMapping("/{id}")
+//    public void deleteOfferById(@PathVariable Long id) {
+//        eventService.deleteEvent(id);
+//    }
 
 }
