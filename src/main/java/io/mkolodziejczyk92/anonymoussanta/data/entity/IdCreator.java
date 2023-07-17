@@ -7,7 +7,6 @@ public abstract class IdCreator {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     public Long getId() {
         return id;
     }
@@ -15,7 +14,6 @@ public abstract class IdCreator {
     public void setId(Long id) {
         this.id = id;
     }
-
 
     @Override
     public int hashCode() {

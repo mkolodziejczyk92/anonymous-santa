@@ -23,15 +23,16 @@ public class AuthService {
 
     public String register(RegisterRequest request) {
         User user = User.builder()
-                .username(request.getUsername())
-                .password(encoder.encode(request.getPassword()))
                 .email(request.getEmail())
+                .password(encoder.encode(request.getPassword()))
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
                 .role(ERole.USER)
                 .build();
         userRepository.save(user);
 
         UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
-                .username(user.getUsername())
+                .username(user.getEmail())
                 .password(user.getPassword())
                 .roles(user.getRole().name())
                 .build();
@@ -43,13 +44,13 @@ public class AuthService {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
         );
-        User user = userRepository.findByUsername(
+        User user = userRepository.findByEmail(
                         authRequest.getUsername()
                 )
                 .orElseThrow(() -> new UsernameNotFoundException("Username not found."));
 
         UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
-                .username(user.getUsername())
+                .username(user.getEmail())
                 .password(user.getPassword())
                 .roles(user.getRole().name())
                 .build();

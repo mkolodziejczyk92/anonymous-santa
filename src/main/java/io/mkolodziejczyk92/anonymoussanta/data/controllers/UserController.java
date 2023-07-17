@@ -14,24 +14,24 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
-//
-//    @PostMapping
-//    public void createUser(@RequestBody UserDto userDto) {
-//        UserDto savedUser = userService.saveUser(userDto);
-//    }
-//
-//    @GetMapping
-//    public List<UserDto> getAllUsers() {
-//        return UserService.getAllUsers();
-//    }
-//
-//    @PutMapping("/{id}")
-//    public void updateUserById(@RequestBody UserDto userDto, @PathVariable Long id) {
-//        userService.updateUserById(id, userDto);
-//    }
-//
-//    @DeleteMapping("/{id}")
-//    public void deleteUserById(@PathVariable Long id) {
-//        userService.deleteUser(id);
-//    }
+
+    @PostMapping
+    public void createUser(@RequestBody UserDto userDto) {
+        UserDto savedUser = userService.saveUser(userDto);
+    }
+
+    @GetMapping
+    public List<UserDto> getAllUsers() {
+        return UserService.getAllUsers();
+    }
+
+    @PutMapping("/{id}")
+    public void updateUserById(@RequestBody UserDto userDto, @PathVariable Long id) {
+        userService.updateUserById(id, userDto);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteUserById(@PathVariable Long id) {
+        userService.deleteUser(id);
+    }
 }

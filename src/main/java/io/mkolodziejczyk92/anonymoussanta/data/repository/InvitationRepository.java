@@ -1,10 +1,9 @@
 package io.mkolodziejczyk92.anonymoussanta.data.repository;
 
-import io.mkolodziejczyk92.anonymoussanta.data.entity.Family;
+import io.mkolodziejczyk92.anonymoussanta.data.entity.Invitation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface FamilyRepository extends JpaRepository<Family, Long> {
-
+public interface InvitationRepository extends JpaRepository<Invitation, Long> {
 }

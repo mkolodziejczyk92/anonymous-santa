@@ -1,7 +1,11 @@
 package io.mkolodziejczyk92.anonymoussanta.data.service;
 
+import io.mkolodziejczyk92.anonymoussanta.data.entity.User;
+import io.mkolodziejczyk92.anonymoussanta.data.model.UserDto;
 import io.mkolodziejczyk92.anonymoussanta.data.repository.UserRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class UserService {
@@ -9,5 +13,21 @@ public class UserService {
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
+    }
+
+    public static List<UserDto> getAllUsers() {
+        return null;
+    }
+    public UserDto saveUser(UserDto userDto) {
+        return null;
+    }
+
+    public void updateUserById(Long id, UserDto userDto) {
+    }
+
+    public void deleteUser(Long id) {
+    }
+    public User getUserById(String organizerId) {
+        return userRepository.findById(Long.valueOf(organizerId)).orElseThrow();
     }
 }

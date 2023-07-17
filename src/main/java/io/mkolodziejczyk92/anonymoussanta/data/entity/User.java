@@ -5,6 +5,8 @@ import io.mkolodziejczyk92.anonymoussanta.data.enums.ERole;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,7 +16,7 @@ import lombok.*;
 @Table(name = "user")
 public class User extends IdCreator {
 
-    private String username;
+    private String email;
 
     @JsonIgnore
     private String password;
@@ -25,13 +27,14 @@ public class User extends IdCreator {
     @Column(name = "last_name")
     private String lastName;
 
-    private String email;
-
-    @Column(name = "registration_code")
-    private String registrationCode;
-
     @Enumerated(EnumType.STRING)
     private ERole role;
+
+    @OneToMany
+    private List<Invitation> invitations;
+
+
+
 
 
 }

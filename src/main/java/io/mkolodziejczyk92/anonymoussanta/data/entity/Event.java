@@ -1,21 +1,19 @@
 package io.mkolodziejczyk92.anonymoussanta.data.entity;
 
-import io.mkolodziejczyk92.anonymoussanta.data.enums.ECurrency;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @Entity
 @Table(name = "event")
-public class Event extends IdCreator{
+public class Event extends IdCreator {
 
     private String name;
 
@@ -27,17 +25,15 @@ public class Event extends IdCreator{
 
     private Integer budget;
 
-    @Enumerated(EnumType.STRING)
-    private ECurrency eCurrency;
+    private String currency;
 
-    @Column(name = "registration_code")
-    private String registrationCode;
+    @Column(name = "event_password")
+    private String eventPassword;
+
+    @OneToMany(mappedBy = "event")
+    private List<Invitation> listOfInvitationForEvent;
 
     @OneToOne
-    @JoinColumn(name = "organizer_id")
     private User organizer;
-
-    @OneToOne
-    private Family family;
 
 }
