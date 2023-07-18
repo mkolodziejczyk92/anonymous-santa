@@ -31,30 +31,21 @@ public class AuthService {
                 .build();
         userRepository.save(user);
 
-        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail())
-                .password(user.getPassword())
-                .roles(user.getRole().name())
-                .build();
 
-        return jwtService.generateToken(userDetails);
+        return jwtService.generateToken(user);
     }
 
     public String authenticate(AuthRequest authRequest) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
+                new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword())
         );
         User user = userRepository.findByEmail(
-                        authRequest.getUsername()
+                        authRequest.getEmail()
                 )
                 .orElseThrow(() -> new UsernameNotFoundException("Username not found."));
 
-        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail())
-                .password(user.getPassword())
-                .roles(user.getRole().name())
-                .build();
-        return jwtService.generateToken(userDetails);
+
+        return jwtService.generateToken(user);
     }
 
 }
