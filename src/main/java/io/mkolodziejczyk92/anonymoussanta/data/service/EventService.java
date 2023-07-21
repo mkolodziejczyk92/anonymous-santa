@@ -1,10 +1,17 @@
 package io.mkolodziejczyk92.anonymoussanta.data.service;
 
 import io.mkolodziejczyk92.anonymoussanta.data.entity.Event;
+import io.mkolodziejczyk92.anonymoussanta.data.entity.Invitation;
+import io.mkolodziejczyk92.anonymoussanta.data.mapper.EventMapper;
+import io.mkolodziejczyk92.anonymoussanta.data.mapper.InvitationMapper;
 import io.mkolodziejczyk92.anonymoussanta.data.model.EventDto;
+import io.mkolodziejczyk92.anonymoussanta.data.model.InvitationDto;
 import io.mkolodziejczyk92.anonymoussanta.data.repository.EventRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 @Service
@@ -12,19 +19,26 @@ public class EventService {
     private final EventRepository eventRepository;
     private final InvitationService invitationService;
     private final UserService userService;
+    private final EventMapper eventMapper;
+    private final InvitationMapper invitationMapper;
 
-    public EventService(EventRepository eventRepository, InvitationService invitationService, UserService userService) {
+    public EventService(EventRepository eventRepository,
+                        InvitationService invitationService,
+                        UserService userService,
+                        EventMapper eventMapper,
+                        InvitationMapper invitationMapper) {
         this.eventRepository = eventRepository;
         this.invitationService = invitationService;
         this.userService = userService;
+        this.eventMapper = eventMapper;
+        this.invitationMapper = invitationMapper;
     }
 
-    public Event getEventById(Long eventId){
-        return eventRepository.findById(eventId).orElseThrow();
-    }
+    @Transactional
+    public void sendInvitationsToParticipantsAndSaveEvent(EventDto eventDto) {
 
-    //TODO: add transactional annotation
-    public void saveEvent(EventDto eventDto) {
+        //TODO: send invitations to participants
+
         Event event = Event.builder()
                 .name(eventDto.getName())
                 .eventDate(eventDto.getEventDate())
@@ -37,7 +51,7 @@ public class EventService {
 
         Event eventWithId = eventRepository.save(event);
         eventWithId.setListOfInvitationForEvent(
-                invitationService.getListOfInvitationEntities(
+                invitationService.createListOfInvitationEntitiesForSavingEvent(
                         eventDto.getListOfInvitationForEvent(), eventWithId)
         );
         eventRepository.save(eventWithId);
@@ -55,5 +69,23 @@ public class EventService {
             password.append(character);
         }
         return password.toString();
+    }
+
+    public void deleteEvent(Long id) {
+        eventRepository.deleteById(id);
+    }
+
+    public List<EventDto> getAllEventsByUserId(Long id) {
+        List<Invitation> allAcceptedUserInvitations = invitationService.getAllUserAcceptedInvitations(id);
+        List<Event> allUserEvents = new ArrayList<>();
+        for (Invitation invitation : allAcceptedUserInvitations) {
+            allUserEvents.add(invitation.getEvent());
+        }
+        allUserEvents.addAll(eventRepository.findByOrganizerId(id));
+        return eventMapper.mapToEventDtoList(allUserEvents);
+    }
+
+    public List<InvitationDto> getAllParticipantsForEventByEventId(Long eventId) {
+        return invitationMapper.mapToInvitationDtoList(invitationService.getAllInvitationsForEvent(eventId));
     }
 }

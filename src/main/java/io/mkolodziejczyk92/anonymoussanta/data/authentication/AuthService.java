@@ -7,7 +7,6 @@ import io.mkolodziejczyk92.anonymoussanta.data.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,8 +29,6 @@ public class AuthService {
                 .role(ERole.USER)
                 .build();
         userRepository.save(user);
-
-
         return jwtService.generateToken(user);
     }
 
@@ -43,8 +40,6 @@ public class AuthService {
                         authRequest.getEmail()
                 )
                 .orElseThrow(() -> new UsernameNotFoundException("Username not found."));
-
-
         return jwtService.generateToken(user);
     }
 
