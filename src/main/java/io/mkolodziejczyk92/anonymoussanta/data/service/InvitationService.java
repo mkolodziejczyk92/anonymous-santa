@@ -18,7 +18,7 @@ public class InvitationService {
         this.invitationRepository = invitationRepository;
     }
 
-    public List<Invitation> getListOfInvitationEntities(List<InvitationDto> listOfInvitationForEvent, Event event) {
+    public List<Invitation> createListOfInvitationEntitiesForSavingEvent(List<InvitationDto> listOfInvitationForEvent, Event event) {
         List<Invitation> invitationEntities = new ArrayList<>();
         for (InvitationDto invitation: listOfInvitationForEvent) {
             invitationEntities.add(Invitation.builder()
@@ -32,5 +32,13 @@ public class InvitationService {
                     .build());
         }
         return invitationEntities;
+    }
+
+    public List<Invitation> getAllUserAcceptedInvitations(Long userId){
+        return invitationRepository.findAllByParticipantStatusIsTrueAndUserId(userId);
+    }
+
+    public List<Invitation> getAllInvitationsForEvent(Long eventId) {
+        return invitationRepository.findAllByEventId(eventId);
     }
 }
