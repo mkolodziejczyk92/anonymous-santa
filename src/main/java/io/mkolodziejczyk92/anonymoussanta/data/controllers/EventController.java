@@ -77,7 +77,7 @@ public class EventController {
     @PostMapping("/{eventId}/draw")
     public ResponseEntity<String> performAPairDraw(@PathVariable Long eventId){
         try {
-            eventService.makeADraw(eventId);
+            eventService.makeDrawAndSendInformationToParticipantsAndSavePairsInDb(eventId);
             return ResponseEntity.ok("The draw has been made");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred during the execution of the draw.");
