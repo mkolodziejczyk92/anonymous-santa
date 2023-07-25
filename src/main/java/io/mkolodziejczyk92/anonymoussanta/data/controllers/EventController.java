@@ -43,20 +43,20 @@ public class EventController {
         }
     }
 
-    @DeleteMapping("/delete/{eventId}")
-    public ResponseEntity<String> deleteEventById(@PathVariable Long eventId) {
+    @DeleteMapping("/delete/{eventId}/{userId}")
+    public ResponseEntity<String> deleteEventById(@PathVariable Long eventId, @PathVariable Long userId) {
         try {
-            eventService.deleteEvent(eventId);
+            eventService.deleteEvent(eventId, userId);
             return ResponseEntity.ok("Event has been deleted");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while trying to delete the event.");
         }
     }
 
-    @GetMapping("/participants-by-event-id/{eventId}")
-    public ResponseEntity<List<InvitationDto>> getAllParticipantsForEvent(@PathVariable Long eventId){
+    @GetMapping("/participants-by-event-id/{eventId}/{userId}")
+    public ResponseEntity<List<InvitationDto>> getAllParticipantsForEvent(@PathVariable Long eventId, @PathVariable Long userId){
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllParticipantsForEventByEventId(eventId));
+            return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllParticipantsForEventByEventId(eventId, userId));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ArrayList<>());
         }
@@ -72,10 +72,10 @@ public class EventController {
         }
     }
 
-    @PostMapping("/{eventId}/draw")
-    public ResponseEntity<String> performAPairDraw(@PathVariable Long eventId){
+    @PostMapping("/draw/{eventId}/{userId}")
+    public ResponseEntity<String> performAPairDraw(@PathVariable Long eventId, @PathVariable Long userId){
         try {
-            eventService.makeDrawAndSendInformationToParticipantsAndSavePairsInDb(eventId);
+            eventService.makeDrawAndSendInformationToParticipantsAndSavePairsInDb(eventId, userId);
             return ResponseEntity.ok("The draw has been made");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred during the execution of the draw.");
