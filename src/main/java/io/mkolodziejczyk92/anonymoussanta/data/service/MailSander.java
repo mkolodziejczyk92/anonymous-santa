@@ -6,7 +6,7 @@ import javax.mail.internet.MimeMessage;
 import java.util.Properties;
 
 public class MailSander {
-    String username = "anonymous.santa.reg@gmail.com";
+    String username = System.getenv("GOOGLE_API_MAIL");
     String appPassword = System.getenv("GOOGLE_API_KEY");
 
     public void sendEmailWithInvitation(
