@@ -1,5 +1,8 @@
 package io.mkolodziejczyk92.anonymoussanta.data.config;
 
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -9,9 +12,12 @@ import org.springframework.web.filter.CorsFilter;
 import java.util.Arrays;
 import java.util.Collections;
 
+@Slf4j
 @Configuration
 public class CorsConfig {
     private final long MAX_AGE_SECS = 3600;
+
+    private final Logger logger = LoggerFactory.getLogger(CorsConfig.class);
 
     @Bean
     public CorsFilter corsFilter() {
@@ -25,6 +31,7 @@ public class CorsConfig {
         config.setMaxAge(MAX_AGE_SECS);
 
         source.registerCorsConfiguration("/**", config);
+        logger.info("CORS IS ACTIVATED");
         return new CorsFilter(source);
     }
 

@@ -1,9 +1,10 @@
 package io.mkolodziejczyk92.anonymoussanta.data.controllers;
 
+import io.mkolodziejczyk92.anonymoussanta.data.config.JwtService;
 import io.mkolodziejczyk92.anonymoussanta.data.model.EventDto;
 import io.mkolodziejczyk92.anonymoussanta.data.model.InvitationDto;
-import io.mkolodziejczyk92.anonymoussanta.data.repository.EventRepository;
 import io.mkolodziejczyk92.anonymoussanta.data.service.EventService;
+import io.mkolodziejczyk92.anonymoussanta.data.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,12 +17,15 @@ import java.util.Map;
 @RequestMapping("/event")
 public class EventController {
     private final EventService eventService;
-    private final EventRepository eventRepository;
+    private final JwtService jwtService;
+    private final UserService userService;
 
     public EventController(EventService eventService,
-                           EventRepository eventRepository) {
+                           JwtService jwtService,
+                           UserService userService) {
         this.eventService = eventService;
-        this.eventRepository = eventRepository;
+        this.jwtService = jwtService;
+        this.userService = userService;
     }
 
     @PostMapping("/add")
@@ -34,9 +38,12 @@ public class EventController {
         }
     }
 
-    @GetMapping("/user-events/{userId}")
-    public ResponseEntity<List<EventDto>> getAllEventsForLogInUser(@PathVariable Long userId) {
+    @PostMapping("/user-events/{token}")
+    public ResponseEntity<List<EventDto>> getAllEventsForLogInUser(@RequestHeader("Authorization") String bearerToken) {
         try {
+            String token = bearerToken.substring(7);
+            String extractedUsername = jwtService.extractUserName(token);
+            Long userId = userService.getUserIdByUsernameAsMail(extractedUsername);
             return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllEventsByUserId(userId));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ArrayList<>());
@@ -54,7 +61,7 @@ public class EventController {
     }
 
     @GetMapping("/participants-by-event-id/{eventId}/{userId}")
-    public ResponseEntity<List<InvitationDto>> getAllParticipantsForEvent(@PathVariable Long eventId, @PathVariable Long userId){
+    public ResponseEntity<List<InvitationDto>> getAllParticipantsForEvent(@PathVariable Long eventId, @PathVariable Long userId) {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllParticipantsForEventByEventId(eventId, userId));
         } catch (Exception e) {
@@ -63,7 +70,7 @@ public class EventController {
     }
 
     @PostMapping("/join-to-the-event")
-    public ResponseEntity<String> joinToTheEvent(@RequestBody Map<String, String> request){
+    public ResponseEntity<String> joinToTheEvent(@RequestBody Map<String, String> request) {
         try {
             eventService.joinToTheEvent(request);
             return ResponseEntity.ok("You joined to the event.");
@@ -73,7 +80,7 @@ public class EventController {
     }
 
     @PostMapping("/draw/{eventId}/{userId}")
-    public ResponseEntity<String> performAPairDraw(@PathVariable Long eventId, @PathVariable Long userId){
+    public ResponseEntity<String> performAPairDraw(@PathVariable Long eventId, @PathVariable Long userId) {
         try {
             eventService.makeDrawAndSendInformationToParticipantsAndSavePairsInDb(eventId, userId);
             return ResponseEntity.ok("The draw has been made");

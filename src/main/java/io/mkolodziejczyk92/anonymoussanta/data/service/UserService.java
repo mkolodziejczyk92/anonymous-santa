@@ -30,4 +30,8 @@ public class UserService {
     public User getUserById(String organizerId) {
         return userRepository.findById(Long.valueOf(organizerId)).orElseThrow();
     }
+
+    public Long getUserIdByUsernameAsMail(String email) {
+        return userRepository.findByEmail(email).get().getId();
+    }
 }
