@@ -29,8 +29,12 @@ public class EventController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<String> createEvent(@RequestBody EventDto eventDto) {
+    public ResponseEntity<String> createEvent(@RequestHeader("Authorization") String bearerToken, @RequestBody EventDto eventDto) {
         try {
+            String token = bearerToken.substring(7);
+            String extractedUsername = jwtService.extractUserName(token);
+            Long userId = userService.getUserIdByUsernameAsMail(extractedUsername);
+            eventDto.setOrganizerId(String.valueOf(userId));
             eventService.saveEventAndSendInvitationsToParticipants(eventDto);
             return ResponseEntity.ok("Event has been saved.");
         } catch (Exception e) {
@@ -38,7 +42,7 @@ public class EventController {
         }
     }
 
-    @PostMapping("/user-events/{token}")
+    @GetMapping("/user-events")
     public ResponseEntity<List<EventDto>> getAllEventsForLogInUser(@RequestHeader("Authorization") String bearerToken) {
         try {
             String token = bearerToken.substring(7);

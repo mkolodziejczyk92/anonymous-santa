@@ -44,19 +44,17 @@ public class EventService {
                 .build();
 
         Event eventWithId = eventRepository.save(event);
-        eventWithId.setListOfInvitationForEvent(
-                invitationService.createListOfInvitationEntitiesForSavingEvent(
-                        eventDto.getListOfInvitationForEvent(), eventWithId)
-        );
-        eventRepository.save(eventWithId);
-        eventWithId.getListOfInvitationForEvent()
-                .forEach(invitation ->
-                        mailSander.sendEmailWithInvitation(
-                                invitation.getFullName(),
-                                invitation.getEvent().getName(),
-                                String.valueOf(invitation.getEvent().getId()),
-                                invitation.getParticipantEmail(),
-                                invitation.getEventPassword()));
+        List<Invitation> listOfInvitationEntitiesForSavingEvent =
+                invitationService.createListOfInvitationEntitiesForSavingEvent(eventDto.getListOfInvitationForEvent(), eventWithId);
+        for (Invitation invitation : listOfInvitationEntitiesForSavingEvent) {
+            invitationService.addNewInvitation(invitation);
+            mailSander.sendEmailWithInvitation(
+                    invitation.getFullName(),
+                    eventWithId.getName(),
+                    String.valueOf(invitation.getEvent().getId()),
+                    invitation.getParticipantEmail(),
+                    eventWithId.getEventPassword());
+        }
     }
 
     public static String getEventPassword() {
@@ -206,7 +204,7 @@ public class EventService {
     public String pickRandomImage() {
         Random random = new Random();
         int imageNumber = random.nextInt(8) + 1;
-        return "pic" + imageNumber;
+        return "pic" + imageNumber + ".jpg";
     }
 
 }
