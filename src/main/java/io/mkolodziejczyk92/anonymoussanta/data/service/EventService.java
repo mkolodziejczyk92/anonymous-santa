@@ -111,6 +111,7 @@ public class EventService {
                     .budget(event.getBudget())
                     .currency(event.getCurrency())
                     .imageUrl(event.getImageUrl())
+                    .organizerId(String.valueOf(id))
                     .listOfInvitationForEvent(invitationMapper.mapToInvitationDtoList(event.getListOfInvitationForEvent()))
                     .build());
         }

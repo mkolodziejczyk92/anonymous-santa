@@ -45,8 +45,8 @@ public class InvitationService {
 
     public List<Invitation> createListOfInvitationEntitiesForSavingEvent(List<InvitationDto> listOfInvitationForEvent, Event event) {
         List<Invitation> invitationEntities = new ArrayList<>();
-        Invitation invitation = new Invitation();
         for (InvitationDto invitationDto : listOfInvitationForEvent) {
+            Invitation invitation = new Invitation();
             invitation.setParticipantName(invitationDto.getParticipantName());
             invitation.setParticipantSurname(invitationDto.getParticipantSurname());
             invitation.setParticipantEmail(invitationDto.getParticipantEmail());

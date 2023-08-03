@@ -37,7 +37,7 @@ public class Event extends IdCreator {
     @OneToMany(mappedBy = "event")
     private List<Invitation> listOfInvitationForEvent;
 
-    @OneToOne
+    @ManyToOne
     private User organizer;
 
 }
