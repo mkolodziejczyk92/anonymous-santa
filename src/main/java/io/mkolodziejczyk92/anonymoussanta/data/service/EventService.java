@@ -28,6 +28,8 @@ public class EventService {
 
     @Transactional
     public void saveEventAndSendInvitationsToParticipants(EventDto eventDto) {
+        List<String> passwordsForInvitations = createPasswordsForInvitations(eventDto);
+
         Event event = Event.builder()
                 .name(eventDto.getName())
                 .eventDate(eventDto.getEventDate())
@@ -35,37 +37,24 @@ public class EventService {
                 .budget(eventDto.getBudget())
                 .currency(eventDto.getCurrency())
                 .imageUrl(pickRandomImage())
-                .eventPassword(getEventPassword())
+                .eventPasswords(passwordsForInvitations)
                 .organizer(userService.getUserById(eventDto.getOrganizerId()))
                 .build();
 
         Event eventWithId = eventRepository.save(event);
         List<Invitation> listOfInvitationEntitiesForSavingEvent =
                 invitationService.createListOfInvitationEntitiesForSavingEvent(eventDto.getListOfInvitationForEvent(), eventWithId);
-        for (Invitation invitation : listOfInvitationEntitiesForSavingEvent) {
-            invitationService.addNewInvitation(invitation);
+        for (int invitationIndex = 0; invitationIndex < listOfInvitationEntitiesForSavingEvent.size(); invitationIndex++) {
+            Invitation invitation = invitationService.addNewInvitation(listOfInvitationEntitiesForSavingEvent.get(invitationIndex));
             mailSander.sendEmailWithInvitation(
                     invitation.getFullName(),
                     eventWithId.getName(),
                     String.valueOf(invitation.getEvent().getId()),
                     invitation.getParticipantEmail(),
-                    eventWithId.getEventPassword());
+                    passwordsForInvitations.get(invitationIndex));
         }
     }
 
-    public static String getEventPassword() {
-        final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        final int PASSWORD_LENGTH = 10;
-        StringBuilder password = new StringBuilder();
-        Random random = new Random();
-
-        for (int i = 0; i < PASSWORD_LENGTH; i++) {
-            int index = random.nextInt(CHARACTERS.length());
-            char character = CHARACTERS.charAt(index);
-            password.append(character);
-        }
-        return password.toString();
-    }
 
     public void deleteEvent(Long eventId, Long userId) {
         eventRepository.findById(eventId).ifPresentOrElse(event -> {
@@ -95,11 +84,11 @@ public class EventService {
                     .imageUrl(event.getImageUrl())
                     .giftReceiverForLogInUser(
                             invitation.getGiftReceiver() == null ? "The draw has not taken place" : invitation.getGiftReceiver())
-                    .logInUserIsAnOrganizer(id.equals(event.getOrganizer().getId()))
                     .build());
         }
         List<Event> eventListWhereLogInUserIsOrganizer = eventRepository.findByOrganizerId(id);
         for (Event event : eventListWhereLogInUserIsOrganizer) {
+
             allUserEvents.add(EventDto.builder()
                     .id(event.getId())
                     .name(event.getName())
@@ -114,6 +103,7 @@ public class EventService {
         }
         return allUserEvents;
     }
+
 
     public List<InvitationDto> getAllParticipantsForEventByEventId(Long eventId, Long userId) {
         List<InvitationDto> invitationDtoList = new ArrayList<>();
@@ -135,49 +125,24 @@ public class EventService {
     }
 
     public void joinToTheEvent(Map<String, String> request) {
-        String eventId = request.get("eventId");
+        String eventId = request.get("eventID");
         String eventPassword = request.get("eventPassword");
         String userEmail = request.get("userEmail");
-
         Optional<Event> eventOptional = eventRepository.findById(Long.valueOf(eventId));
         eventOptional.ifPresentOrElse(event -> {
-            if (event.getEventPassword().equals(eventPassword)) {
+            if (event.getEventPasswords().contains(eventPassword)) {
                 event.getListOfInvitationForEvent().stream()
-                        .filter(invitation -> invitation.getUser().getEmail().equals(userEmail))
-                        .findFirst().get().setParticipantStatus(true);
+                        .filter(invitation -> invitation.getParticipantEmail().equals(userEmail))
+                        .findAny()
+                        .ifPresent(invitation -> {
+                            invitation.setUser(userService.getUserByEmail(userEmail));
+                            invitation.setParticipantStatus(true);
+                        });
             }
             eventRepository.save(event);
         }, () -> {
             throw new EntityNotFoundException("Event dose not exist.");
         });
-    }
-
-    private Map<Long, Long> makeADraw(Long eventId) {
-        Map<Long, Long> pairsAfterDraw = new HashMap<>();
-        List<Long> invitationsId = new ArrayList<>();
-
-        Optional<Event> eventOptional = eventRepository.findById(eventId);
-        eventOptional.ifPresentOrElse(event -> {
-            event.getListOfInvitationForEvent().stream()
-                    .map(Invitation::getId)
-                    .forEach(invitationsId::add);
-        }, () -> {
-            throw new EntityNotFoundException("Event dose not exist.");
-        });
-
-        Collections.shuffle(invitationsId);
-        int totalParticipants = invitationsId.size();
-
-        for (int i = 0; i < totalParticipants - 1; i++) {
-            Long giverId = invitationsId.get(i);
-            Long receiverId = invitationsId.get(i + 1);
-            pairsAfterDraw.put(giverId, receiverId);
-        }
-        Long firstParticipantId = invitationsId.get(0);
-        Long lastParticipantId = invitationsId.get(totalParticipants - 1);
-        pairsAfterDraw.put(lastParticipantId, firstParticipantId);
-
-        return pairsAfterDraw;
     }
 
     @Transactional
@@ -219,5 +184,58 @@ public class EventService {
         }
         return invitationsForEvent;
     }
+
+
+    private Map<Long, Long> makeADraw(Long eventId) {
+        Map<Long, Long> pairsAfterDraw = new HashMap<>();
+        List<Long> invitationsId = new ArrayList<>();
+
+        Optional<Event> eventOptional = eventRepository.findById(eventId);
+        eventOptional.ifPresentOrElse(event -> {
+            event.getListOfInvitationForEvent().stream()
+                    .map(Invitation::getId)
+                    .forEach(invitationsId::add);
+        }, () -> {
+            throw new EntityNotFoundException("Event dose not exist.");
+        });
+
+        Collections.shuffle(invitationsId);
+        int totalParticipants = invitationsId.size();
+
+        for (int i = 0; i < totalParticipants - 1; i++) {
+            Long giverId = invitationsId.get(i);
+            Long receiverId = invitationsId.get(i + 1);
+            pairsAfterDraw.put(giverId, receiverId);
+        }
+        Long firstParticipantId = invitationsId.get(0);
+        Long lastParticipantId = invitationsId.get(totalParticipants - 1);
+        pairsAfterDraw.put(lastParticipantId, firstParticipantId);
+
+        return pairsAfterDraw;
+    }
+
+    private List<String> createPasswordsForInvitations(EventDto eventDto) {
+        int numberOfInvitations = eventDto.getListOfInvitationForEvent().size();
+        List<String> passwordsForInvitations = new ArrayList<>();
+        for (int numberOfInvitationsSent = 0; numberOfInvitations > numberOfInvitationsSent; numberOfInvitationsSent++) {
+            passwordsForInvitations.add(getEventPassword());
+        }
+        return passwordsForInvitations;
+    }
+
+    public static String getEventPassword() {
+        final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        final int PASSWORD_LENGTH = 10;
+        StringBuilder password = new StringBuilder();
+        Random random = new Random();
+
+        for (int i = 0; i < PASSWORD_LENGTH; i++) {
+            int index = random.nextInt(CHARACTERS.length());
+            char character = CHARACTERS.charAt(index);
+            password.append(character);
+        }
+        return password.toString();
+    }
+
 
 }
