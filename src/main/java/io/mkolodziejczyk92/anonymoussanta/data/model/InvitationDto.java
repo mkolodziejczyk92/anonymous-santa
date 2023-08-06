@@ -1,7 +1,6 @@
 package io.mkolodziejczyk92.anonymoussanta.data.model;
 
-import io.mkolodziejczyk92.anonymoussanta.data.entity.Event;
-import io.mkolodziejczyk92.anonymoussanta.data.entity.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 @NoArgsConstructor
@@ -17,7 +16,8 @@ public class InvitationDto {
     private boolean participantStatus;
     private String eventPassword;
     private String giftReceiver;
-    private Event event;
-    private User user;
+    @JsonIgnore
+    private EventDto eventDto;
+    private UserDto userDto;
 
 }
