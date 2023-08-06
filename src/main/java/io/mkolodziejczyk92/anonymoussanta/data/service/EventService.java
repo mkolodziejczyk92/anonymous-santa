@@ -2,7 +2,6 @@ package io.mkolodziejczyk92.anonymoussanta.data.service;
 
 import io.mkolodziejczyk92.anonymoussanta.data.entity.Event;
 import io.mkolodziejczyk92.anonymoussanta.data.entity.Invitation;
-import io.mkolodziejczyk92.anonymoussanta.data.mapper.InvitationMapper;
 import io.mkolodziejczyk92.anonymoussanta.data.model.EventDto;
 import io.mkolodziejczyk92.anonymoussanta.data.model.InvitationDto;
 import io.mkolodziejczyk92.anonymoussanta.data.repository.EventRepository;
@@ -17,17 +16,14 @@ public class EventService {
     private final EventRepository eventRepository;
     private final InvitationService invitationService;
     private final UserService userService;
-    private final InvitationMapper invitationMapper;
     private final MailSander mailSander = new MailSander();
 
     public EventService(EventRepository eventRepository,
                         InvitationService invitationService,
-                        UserService userService,
-                        InvitationMapper invitationMapper) {
+                        UserService userService) {
         this.eventRepository = eventRepository;
         this.invitationService = invitationService;
         this.userService = userService;
-        this.invitationMapper = invitationMapper;
     }
 
     @Transactional
@@ -99,6 +95,7 @@ public class EventService {
                     .imageUrl(event.getImageUrl())
                     .giftReceiverForLogInUser(
                             invitation.getGiftReceiver() == null ? "The draw has not taken place" : invitation.getGiftReceiver())
+                    .logInUserIsAnOrganizer(id.equals(event.getOrganizer().getId()))
                     .build());
         }
         List<Event> eventListWhereLogInUserIsOrganizer = eventRepository.findByOrganizerId(id);
@@ -112,7 +109,7 @@ public class EventService {
                     .currency(event.getCurrency())
                     .imageUrl(event.getImageUrl())
                     .organizerId(String.valueOf(id))
-                    .listOfInvitationForEvent(invitationMapper.mapToInvitationDtoList(event.getListOfInvitationForEvent()))
+                    .logInUserIsAnOrganizer(id.equals(event.getOrganizer().getId()))
                     .build());
         }
         return allUserEvents;
@@ -155,7 +152,7 @@ public class EventService {
         });
     }
 
-    public Map<Long, Long> makeADraw(Long eventId) {
+    private Map<Long, Long> makeADraw(Long eventId) {
         Map<Long, Long> pairsAfterDraw = new HashMap<>();
         List<Long> invitationsId = new ArrayList<>();
 
@@ -202,10 +199,25 @@ public class EventService {
                 });
     }
 
-    public String pickRandomImage() {
+    private String pickRandomImage() {
         Random random = new Random();
         int imageNumber = random.nextInt(8) + 1;
         return "pic" + imageNumber + ".jpg";
+    }
+
+    private List<InvitationDto> mapInvitationListToInvitationDtoList(List<Invitation> listOfInvitationForEvent) {
+        List<InvitationDto> invitationsForEvent = new ArrayList<>();
+        for (Invitation invitation : listOfInvitationForEvent) {
+            invitationsForEvent.add(InvitationDto.builder()
+                    .participantName(invitation.getParticipantName())
+                    .participantSurname(invitation.getParticipantSurname())
+                    .participantEmail(invitation.getParticipantEmail())
+                    .participantStatus(invitation.isParticipantStatus())
+                    .eventPassword(invitation.getEventPassword())
+                    .giftReceiver(invitation.getGiftReceiver())
+                    .build());
+        }
+        return invitationsForEvent;
     }
 
 }
