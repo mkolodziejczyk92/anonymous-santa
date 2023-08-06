@@ -67,7 +67,7 @@ public class InvitationService {
         return invitationRepository.findAllByEventId(eventId);
     }
 
-    public void addNewInvitation(Invitation invitation) {
-        invitationRepository.save(invitation);
+    public Invitation addNewInvitation(Invitation invitation) {
+        return invitationRepository.save(invitation);
     }
 }

@@ -48,7 +48,7 @@ public class EventController {
             String token = bearerToken.substring(7);
             String extractedUsername = jwtService.extractUserName(token);
             Long userId = userService.getUserIdByUsernameAsMail(extractedUsername);
-            return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllEventsByUserId(userId));
+            return ResponseEntity.ok(eventService.getAllEventsByUserId(userId));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ArrayList<>());
         }
