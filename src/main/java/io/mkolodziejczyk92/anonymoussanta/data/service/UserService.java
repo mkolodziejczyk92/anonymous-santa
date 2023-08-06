@@ -34,4 +34,8 @@ public class UserService {
     public Long getUserIdByUsernameAsMail(String email) {
         return userRepository.findByEmail(email).get().getId();
     }
+
+    public User getUserByEmail(String email){
+        return userRepository.findByEmail(email).orElseThrow();
+    }
 }
