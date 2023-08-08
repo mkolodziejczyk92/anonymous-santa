@@ -54,9 +54,13 @@ public class EventController {
         }
     }
 
-    @DeleteMapping("/delete/{eventId}/{userId}")
-    public ResponseEntity<String> deleteEventById(@PathVariable Long eventId, @PathVariable Long userId) {
+    @DeleteMapping("/delete/{eventId}")
+    public ResponseEntity<String> deleteEventById(@PathVariable(name = "eventId") Long eventId,
+                                                  @RequestHeader("Authorization") String bearerToken) {
         try {
+            String token = bearerToken.substring(7);
+            String extractedUsername = jwtService.extractUserName(token);
+            Long userId = userService.getUserIdByUsernameAsMail(extractedUsername);
             eventService.deleteEvent(eventId, userId);
             return ResponseEntity.ok("Event has been deleted");
         } catch (Exception e) {
@@ -64,10 +68,14 @@ public class EventController {
         }
     }
 
-    @GetMapping("/participants-by-event-id/{eventId}/{userId}")
-    public ResponseEntity<List<InvitationDto>> getAllParticipantsForEvent(@PathVariable Long eventId, @PathVariable Long userId) {
+    @GetMapping("/participants-by-event-id/{eventId}")
+    public ResponseEntity<List<InvitationDto>> getAllParticipantsForEvent(@RequestHeader("Authorization") String bearerToken,
+                                                                          @PathVariable(name = "eventId") Long eventId) {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllParticipantsForEventByEventId(eventId, userId));
+            String token = bearerToken.substring(7);
+            String extractedUsername = jwtService.extractUserName(token);
+            Long userId = userService.getUserIdByUsernameAsMail(extractedUsername);
+            return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllParticipantsForEventByEventId(userId, eventId));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ArrayList<>());
         }
@@ -83,9 +91,12 @@ public class EventController {
         }
     }
 
-    @PostMapping("/draw/{eventId}/{userId}")
-    public ResponseEntity<String> performAPairDraw(@PathVariable Long eventId, @PathVariable Long userId) {
+    @PostMapping("/draw/{eventId}")
+    public ResponseEntity<String> performAPairDraw(@PathVariable Long eventId, @RequestHeader("Authorization") String bearerToken) {
         try {
+            String token = bearerToken.substring(7);
+            String extractedUsername = jwtService.extractUserName(token);
+            Long userId = userService.getUserIdByUsernameAsMail(extractedUsername);
             eventService.makeDrawAndSendInformationToParticipantsAndSavePairsInDb(eventId, userId);
             return ResponseEntity.ok("The draw has been made");
         } catch (Exception e) {

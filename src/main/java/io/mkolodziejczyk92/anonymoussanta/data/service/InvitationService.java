@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 public class InvitationService {
@@ -51,7 +52,7 @@ public class InvitationService {
             invitation.setParticipantSurname(invitationDto.getParticipantSurname());
             invitation.setParticipantEmail(invitationDto.getParticipantEmail());
             invitation.setParticipantStatus(false);
-            invitation.setEventPassword(null);
+            invitation.setInvitationPassword(getInvitationPassword());
             invitation.setEvent(event);
             invitation.setUser(null);
             invitationEntities.add(invitation);
@@ -69,5 +70,18 @@ public class InvitationService {
 
     public Invitation addNewInvitation(Invitation invitation) {
         return invitationRepository.save(invitation);
+    }
+    private static String getInvitationPassword() {
+        final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        final int PASSWORD_LENGTH = 10;
+        StringBuilder password = new StringBuilder();
+        Random random = new Random();
+
+        for (int i = 0; i < PASSWORD_LENGTH; i++) {
+            int index = random.nextInt(CHARACTERS.length());
+            char character = CHARACTERS.charAt(index);
+            password.append(character);
+        }
+        return password.toString();
     }
 }
