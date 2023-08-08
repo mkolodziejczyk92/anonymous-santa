@@ -30,9 +30,6 @@ public class Event extends IdCreator {
     @Column(name = "image_url")
     private String imageUrl;
 
-    @Column(name = "event_passwords")
-    private List<String> eventPasswords;
-
     @OneToMany(mappedBy = "event")
     private List<Invitation> listOfInvitationForEvent;
 

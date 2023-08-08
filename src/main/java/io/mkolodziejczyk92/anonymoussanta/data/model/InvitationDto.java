@@ -14,7 +14,7 @@ public class InvitationDto {
     private String participantSurname;
     private String participantEmail;
     private boolean participantStatus;
-    private String eventPassword;
+    private String invitationPassword;
     private String giftReceiver;
     @JsonIgnore
     private EventDto eventDto;
