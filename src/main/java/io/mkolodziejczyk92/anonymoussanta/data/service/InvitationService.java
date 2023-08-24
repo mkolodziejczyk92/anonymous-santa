@@ -37,8 +37,7 @@ public class InvitationService {
             mailSander.sendEmailAfterDraw(
                     invitation.getFullName(),
                     invitation.getEvent().getName(),
-                    invitation.getParticipantEmail(),
-                    receiverFullName);
+                    invitation.getParticipantEmail());
         }, () -> {
             throw new EntityNotFoundException("Invitation dose not exist.");
         });
@@ -71,6 +70,7 @@ public class InvitationService {
     public Invitation addNewInvitation(Invitation invitation) {
         return invitationRepository.save(invitation);
     }
+
     private static String getInvitationPassword() {
         final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         final int PASSWORD_LENGTH = 10;
