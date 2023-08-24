@@ -90,7 +90,6 @@ public class EventService {
         }
         List<Event> eventListWhereLogInUserIsOrganizer = eventRepository.findByOrganizerId(id);
         for (Event event : eventListWhereLogInUserIsOrganizer) {
-
             allUserEvents.add(EventDto.builder()
                     .id(event.getId())
                     .name(event.getName())
@@ -101,6 +100,7 @@ public class EventService {
                     .imageUrl(event.getImageUrl())
                     .organizerId(String.valueOf(id))
                     .logInUserIsAnOrganizer(id.equals(event.getOrganizer().getId()))
+                    .afterDraw(event.isAfterDraw())
                     .build());
         }
         return allUserEvents;
@@ -163,6 +163,8 @@ public class EventService {
                             Long receiver = entry.getValue();
                             invitationService.setGiftReceiverAndSendEmailToGiver(giver, receiver);
                         }
+                        event.setAfterDraw(true);
+                        eventRepository.save(event);
                     } else {
                         throw new RuntimeException("Only organizer can make a draw.");
                     }
