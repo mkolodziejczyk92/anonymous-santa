@@ -20,7 +20,7 @@ public class MailSander {
                 "Hello %s, \n\n" +
                         "\tYou have been invited to %s's event. " +
                         "Please register on our website and join the event by entering:\n" +
-                        "- the event id: %s\n" +
+                        "- the event access id: %s\n" +
                         "- your email\n" +
                         "- the event password: %s\n" +
                         "If you already have an account just log in and join the Event.\n\n" +
