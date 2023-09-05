@@ -38,6 +38,7 @@ public class EventService {
                 .budget(eventDto.getBudget())
                 .currency(eventDto.getCurrency())
                 .imageUrl(pickRandomImage())
+                .eventCode(InvitationService.getAccessPassword())
                 .organizer(userService.getUserById(eventDto.getOrganizerId()))
                 .build();
 
@@ -49,7 +50,7 @@ public class EventService {
             mailSander.sendEmailWithInvitation(
                     invitation.getFullName(),
                     eventWithId.getName(),
-                    String.valueOf(invitation.getEvent().getId()),
+                    invitation.getEvent().getEventCode(),
                     invitation.getParticipantEmail(),
                     invitation.getInvitationPassword());
         }
@@ -86,6 +87,7 @@ public class EventService {
                     .giftReceiverForLogInUser(
                             invitation.getGiftReceiver() ==
                                     null ? "The draw has not taken place." : "Let's buy gift for: " + invitation.getGiftReceiver())
+                    .afterDraw(event.isAfterDraw())
                     .build());
         }
         List<Event> eventListWhereLogInUserIsOrganizer = eventRepository.findByOrganizerId(id);
@@ -127,10 +129,11 @@ public class EventService {
     }
 
     public void joinToTheEvent(Map<String, String> request) {
-        String eventId = request.get("eventID");
+        String eventCode = request.get("eventCode");
         String invitationPassword = request.get("eventPassword");
         String userEmail = request.get("userEmail");
-        Optional<Event> eventOptional = eventRepository.findById(Long.valueOf(eventId));
+        Long eventIdFromInput = eventRepository.findByEventCode(eventCode).getId();
+        Optional<Event> eventOptional = eventRepository.findById(eventIdFromInput);
         eventOptional.ifPresentOrElse(event -> {
             boolean isInputDataCorrect = event.getListOfInvitationForEvent()
                     .stream()
