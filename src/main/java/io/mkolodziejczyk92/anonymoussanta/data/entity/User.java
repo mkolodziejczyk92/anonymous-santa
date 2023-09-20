@@ -30,7 +30,6 @@ public class User extends IdCreator implements UserDetails {
 
     @Column(name = "last_name")
     private String lastName;
-
     @Enumerated(EnumType.STRING)
     private ERole role;
 
@@ -40,9 +39,15 @@ public class User extends IdCreator implements UserDetails {
     @OneToMany
     private List<Event> events;
 
+    private List<String> preferredGifts;
+
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-            return List.of(new SimpleGrantedAuthority(role.name()));
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override
